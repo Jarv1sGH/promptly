@@ -6,9 +6,11 @@ import React, { useEffect, useState } from "react";
 import { signIn, signOut, useSession, getProviders } from "next-auth/react";
 
 const Navbar = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { data: session } = useSession();
+  // const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [providers, setProviders] = useState(null);
   const [toggleDropdown, setToggleDropdown] = useState(false);
+
   useEffect(() => {
     const setProvidersHandler = async () => {
       const response = await getProviders();
@@ -30,7 +32,7 @@ const Navbar = () => {
         <p className="logo_text">Promptly</p>
       </Link>
       <div className="sm:flex hidden">
-        {isLoggedIn ? (
+        {session?.user ? (
           <div className="flex gap-3 md:gap-5">
             <Link href="/create-prompt" className="black_btn">
               Create prompt
@@ -46,7 +48,7 @@ const Navbar = () => {
                 alt="profile"
                 width={40}
                 height={40}
-                src="/assets/images/logo.png"
+                src={session?.user?.image}
               />
             </Link>
           </div>
@@ -70,21 +72,19 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Navigation */}
-
       <div className="sm:hidden flex relative">
-        {true ? (
-          // {session?.user ? (
+        {session?.user ? (
           <div className="flex">
             <Image
-              src={"/assets/images/logo.png"}
+              src={session?.user?.image}
               width={37}
               height={37}
               className="rounded-full"
               alt="profile"
-              onClick={() => setToggleDropdown(!toggleDropdown)} 
+              onClick={() => setToggleDropdown(!toggleDropdown)}
             />
 
-              {toggleDropdown && (
+            {toggleDropdown && (
               <div className="dropdown">
                 <Link
                   href="/profile"
