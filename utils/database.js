@@ -14,11 +14,12 @@ export const connectToDataBase = async () => {
       dbName: "Promptly",
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      family: 4
     });
 
     isConnected = true;
     console.log("connected to database");
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
