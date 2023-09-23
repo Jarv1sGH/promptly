@@ -14,7 +14,6 @@ export const connectToDataBase = async () => {
       dbName: "Promptly",
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      family: 4
     });
 
     isConnected = true;
