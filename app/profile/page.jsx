@@ -1,5 +1,6 @@
 "use client";
 import Profile from "@components/Profile";
+import Loader from "@components/Loader";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -28,11 +29,14 @@ const MyProfile = () => {
   const router = useRouter();
 
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const fetchPosts = async () => {
+    setLoading(true);
     const response = await fetch(`/api/users/${session?.user.id}/posts`);
     const data = await response.json();
     setPosts(data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -42,12 +46,18 @@ const MyProfile = () => {
   }, []);
 
   return (
-    <Profile
-      name={session?.user.name}
-      handleDelete={handleDelete}
-      handleEdit={handleEdit}
-      data={posts}
-    />
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <Profile
+          name={session?.user.name}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+          data={posts}
+        />
+      )}
+    </>
   );
 };
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 import PromptCard from "./PromptCard";
+import Loader from "./Loader";
 
 const PromptCardList = ({ data, handleTagClick }) => {
   return (
@@ -20,26 +21,29 @@ const PromptCardList = ({ data, handleTagClick }) => {
 
 const Feed = () => {
   const [allPosts, setAllPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [searchText, setSearchText] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [searchedResults, setSearchedResults] = useState([]);
 
   const fetchPosts = async () => {
+    setLoading(true);
     const response = await fetch("/api/prompt");
     const data = await response.json();
     setAllPosts(data);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  const filterPrompts = (searchtext) => {
+  const filteredPosts = (searchtext) => {
     const regex = new RegExp(searchtext, "i"); // 'i' flag for case-insensitive search
     return allPosts.filter(
       (item) =>
-        regex.test(item.creator.username) ||
+        regex.test(item.promptCreator.username) ||
         regex.test(item.tag) ||
         regex.test(item.prompt)
     );
@@ -52,7 +56,7 @@ const Feed = () => {
     // debounce method
     setSearchTimeout(
       setTimeout(() => {
-        const searchResult = filterPrompts(e.target.value);
+        const searchResult = filteredPosts(e.target.value);
         setSearchedResults(searchResult);
       }, 500)
     );
@@ -60,34 +64,37 @@ const Feed = () => {
 
   const handleTagClick = (tagName) => {
     setSearchText(tagName);
-
-    const searchResult = filterPrompts(tagName);
+    const searchResult = filteredPosts(tagName);
     setSearchedResults(searchResult);
   };
 
   return (
-    <section className="feed">
-      <form className="relative w-full flex-center">
-        <input
-          type="text"
-          placeholder="Search for a tag or a username"
-          value={searchText}
-          onChange={handleSearchChange}
-          required
-          className="search_input peer"
-        />
-      </form>
-
-      {/* All Prompts */}
-      {searchText ? (
-        <PromptCardList
-          data={searchedResults}
-          handleTagClick={handleTagClick}
-        />
+    <>
+      {loading ? (
+        <Loader />
       ) : (
-        <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
+        <section className="feed">
+          <form className="relative w-full flex-center">
+            <input
+              type="text"
+              placeholder="Search for a tag or a username"
+              value={searchText}
+              onChange={handleSearchChange}
+              required
+              className="search_input peer"
+            />
+          </form>
+          {searchText ? (
+            <PromptCardList
+              data={searchedResults}
+              handleTagClick={handleTagClick}
+            />
+          ) : (
+            <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
+          )}
+        </section>
       )}
-    </section>
+    </>
   );
 };
 
